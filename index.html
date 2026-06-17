@@ -1,243 +1,769 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Berea Fit – Home</title>
+<!-- ======================================================================
+  EDIT ME — quick guide
+  1. Site name: change "THE LONG RUN" in the nav logo + <title> below.
+  2. Photos: create an /images folder next to this file and drop in:
+       images/before.jpg          (main before photo)
+       images/after.jpg           (main after photo)
+       images/checkpoint-1.jpg … checkpoint-4.jpg   (progress gallery)
+     Until those files exist, neat placeholder cards show instead — nothing
+     breaks if you leave them out for now.
+  3. Numbers: every editable stat is marked with an  <!-- EDIT: -->  comment.
+     Update weekly mileage, paces, weight/pace deltas, fasting window times
+     and macros to match your real numbers.
+  4. Nav links / footer links point to "#" placeholders — swap in your
+     Strava / Instagram / email links whenever you're ready.
+========================================================================= -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Long Run — Distance Training &amp; Intermittent Fasting Log</title>
+<meta name="description" content="A personal training log for distance running and intermittent fasting — progress photos, weekly mileage, and the eating window that fuels it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    overflow: hidden;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
+  :root{
+    --ink:#11151D;
+    --ink-2:#171D29;
+    --surface:#1E2536;
+    --surface-2:#252D40;
+    --paper:#ECE6D6;
+    --slate:#8089A0;
+    --slate-dim:#5C6478;
+    --coral:#F2654A;
+    --gold:#E8B23D;
+    --mint:#5FAE8A;
+    --line:rgba(236,230,214,0.10);
+    --line-strong:rgba(236,230,214,0.18);
+
+    --font-display:'Anton', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+
+    --max:1180px;
+    --section-pad:clamp(4rem, 8vw, 7rem);
   }
 
-  #bgCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body,h1,h2,h3,h4,p,figure,ul{margin:0;}
+  ul{padding:0;list-style:none;}
+  img{max-width:100%;display:block;}
+  button{font:inherit;background:none;border:none;cursor:pointer;}
+  a{color:inherit;text-decoration:none;}
+
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
   }
 
-  .content {
-    position: relative;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 0 20px;
+  .container{
+    width:100%;
+    max-width:var(--max);
+    margin:0 auto;
+    padding:0 clamp(1.25rem, 4vw, 2.5rem);
   }
 
-  h1 {
-    font-size: 2.5rem;
-    text-shadow:
-      0 0 10px rgba(173, 216, 230, 0.9),
-      0 0 20px rgba(0, 0, 139, 0.7);
-    margin-bottom: 0;
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--coral);
+    display:flex;
+    align-items:center;
+    gap:0.6rem;
+  }
+  .eyebrow::before{
+    content:"";
+    width:18px;height:1px;
+    background:var(--coral);
+    display:inline-block;
   }
 
-  .line1 {
-    display: inline-block;
-    white-space: nowrap;
-    border-right: 2px solid rgba(255,255,255,0.75);
-    overflow: hidden;
-    width: 0;
-    animation: typing 3s steps(40, end) forwards, blink 0.75s step-end infinite;
+  .h-display{
+    font-family:var(--font-display);
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    line-height:0.98;
+    color:var(--paper);
   }
 
-  .line2 {
-    display: block;
-    font-size: 1.2rem;
-    margin-top: 10px;
-    opacity: 0;
-    animation: fadeInText 2s ease forwards;
-    animation-delay: 3s;
+  .lead{
+    color:var(--slate);
+    font-size:clamp(1rem, 1.6vw, 1.15rem);
+    max-width:42ch;
   }
 
-  .line3 {
-    display: block;
-    font-size: 0.9rem;
-    margin-top: 5px;
-    opacity: 0;
-    animation: fadeInText 2s ease forwards;
-    animation-delay: 5s;
+  .mono{font-family:var(--font-mono);}
+
+  /* ---------- reveal-on-scroll ---------- */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in-view{opacity:1;transform:translateY(0);}
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
   }
 
-  @keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
+  /* ---------- nav ---------- */
+  .site-nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    background:rgba(17,21,29,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem clamp(1.25rem, 4vw, 2.5rem);
+    max-width:var(--max); margin:0 auto;
+  }
+  .logo{
+    font-family:var(--font-display);
+    font-size:1.15rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--paper);
+  }
+  .logo span{color:var(--coral);}
+  .nav-links{
+    display:flex; gap:2.2rem;
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+  .nav-links a{color:var(--slate);transition:color .2s ease;}
+  .nav-links a:hover, .nav-links a:focus-visible{color:var(--paper);}
+  .nav-toggle{display:none; flex-direction:column; gap:5px; padding:6px;}
+  .nav-toggle span{width:22px;height:2px;background:var(--paper);}
+
+  @media (max-width:760px){
+    .nav-links{
+      position:absolute; top:100%; left:0; right:0;
+      background:var(--ink-2);
+      flex-direction:column; gap:0;
+      border-bottom:1px solid var(--line);
+      max-height:0; overflow:hidden; transition:max-height .3s ease;
+    }
+    .nav-links.open{max-height:240px;}
+    .nav-links a{padding:1rem clamp(1.25rem,4vw,2.5rem); width:100%; display:block; border-top:1px solid var(--line);}
+    .nav-toggle{display:flex;}
   }
 
-  @keyframes blink {
-    50% { border-color: transparent; }
+  /* ---------- hero ---------- */
+  .hero{
+    padding:clamp(7rem,14vw,9rem) 0 4rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-inner{display:grid; gap:2.5rem;}
+  .hero h1{font-size:clamp(2.8rem, 8vw, 5.6rem); margin-top:1rem;}
+  .hero .lead{margin-top:1.25rem; font-size:clamp(1.05rem,1.8vw,1.25rem);}
+
+  .hero-actions{display:flex; gap:1rem; flex-wrap:wrap; margin-top:2rem;}
+  .ghost-btn{
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:0.85rem 1.4rem;
+    border:1px solid var(--line-strong);
+    border-radius:999px;
+    color:var(--paper);
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .ghost-btn:hover{border-color:var(--coral); background:rgba(242,101,74,0.08);}
+
+  .race-pill{
+    display:inline-flex; align-items:center; gap:0.6rem;
+    margin-top:1.75rem;
+    font-family:var(--font-mono); font-size:0.78rem; letter-spacing:0.05em;
+    color:var(--slate);
+    border:1px solid var(--line); border-radius:999px;
+    padding:0.5rem 1rem 0.5rem 0.75rem;
+    width:fit-content;
+  }
+  .race-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--mint); box-shadow:0 0 0 4px rgba(95,174,138,0.15);}
+
+  .stat-strip{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1.5rem;
+    margin-top:3rem;
+    padding-top:2.25rem;
+    border-top:1px solid var(--line);
+  }
+  .stat-strip .stat-label{
+    font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--slate-dim);
+  }
+  .stat-strip .stat-value{
+    font-family:var(--font-display);
+    font-size:clamp(1.6rem,3vw,2.3rem);
+    color:var(--paper);
+    margin-top:0.35rem;
+  }
+  @media (max-width:760px){ .stat-strip{grid-template-columns:repeat(2,1fr);} }
+
+  .route-wrap{margin-top:3.5rem; opacity:0.95;}
+  .route-svg{width:100%; height:auto; display:block;}
+  .route-line{
+    fill:none; stroke:var(--coral); stroke-width:2.5; stroke-linecap:round;
+    stroke-dasharray:1000; stroke-dashoffset:1000;
+    animation:draw 2.6s ease-out forwards;
+  }
+  .route-fill{fill:url(#routeGradient); opacity:0.18;}
+  @keyframes draw{ to{stroke-dashoffset:0;} }
+  @media (prefers-reduced-motion: reduce){ .route-line{animation:none; stroke-dashoffset:0;} }
+
+  /* ---------- sections ---------- */
+  .section{padding:var(--section-pad) 0;}
+  .section-alt{background:var(--ink-2);}
+  .section-head{max-width:640px; margin-bottom:3rem;}
+  .section-head h2{font-size:clamp(2rem,4.5vw,3rem); margin-top:0.75rem;}
+  .section-head .lead{margin-top:1rem;}
+
+  /* ---------- progress / compare slider ---------- */
+  .compare{
+    position:relative;
+    aspect-ratio:16/10;
+    border-radius:18px;
+    overflow:hidden;
+    background:linear-gradient(135deg, var(--surface), var(--surface-2));
+    border:1px solid var(--line-strong);
+    user-select:none;
+  }
+  .compare-photo{position:absolute; inset:0;}
+  .compare-photo img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2;}
+  .photo-placeholder{
+    position:absolute; inset:0; z-index:1;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:0.5rem; text-align:center; padding:1rem;
+  }
+  .photo-placeholder .ph-icon{width:34px;height:34px;opacity:0.5;}
+  .photo-placeholder strong{
+    font-family:var(--font-mono); font-size:0.78rem; letter-spacing:0.1em;
+    color:var(--slate); text-transform:uppercase;
+  }
+  .photo-placeholder small{font-family:var(--font-mono); font-size:0.7rem; color:var(--slate-dim);}
+
+  .compare-before{clip-path:polygon(0 0, 50% 0, 50% 100%, 0 100%);}
+  .photo-tag{
+    position:absolute; bottom:14px; z-index:3;
+    font-family:var(--font-mono); font-size:0.7rem; letter-spacing:0.08em;
+    background:rgba(17,21,29,0.75); color:var(--paper);
+    padding:0.4rem 0.7rem; border-radius:6px; text-transform:uppercase;
+  }
+  .compare-before .photo-tag{left:14px;}
+  .compare-after .photo-tag{right:14px;}
+
+  .compare-handle{
+    position:absolute; top:0; bottom:0; left:50%; z-index:4;
+    width:2px; background:var(--paper);
+    transform:translateX(-1px);
+    pointer-events:none;
+  }
+  .compare-handle::after{
+    content:"⇆";
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:38px; height:38px; border-radius:50%;
+    background:var(--paper); color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem;
+  }
+  .compare-range{
+    width:100%; margin-top:1.1rem;
+    -webkit-appearance:none; appearance:none;
+    height:3px; background:var(--line-strong); border-radius:999px; outline:none;
+  }
+  .compare-range::-webkit-slider-thumb{
+    -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+    background:var(--coral); cursor:pointer; border:3px solid var(--ink);
+  }
+  .compare-range::-moz-range-thumb{
+    width:20px; height:20px; border-radius:50%; background:var(--coral);
+    cursor:pointer; border:3px solid var(--ink);
+  }
+  .compare-caption{
+    margin-top:0.85rem; font-family:var(--font-mono); font-size:0.78rem;
+    color:var(--slate-dim); text-align:center;
   }
 
-  @keyframes fadeInText {
-    to { opacity: 1; }
+  .progress-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:3rem; align-items:start;}
+  @media (max-width:860px){ .progress-grid{grid-template-columns:1fr;} }
+
+  .stats-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:1rem;}
+  .stat-card{
+    border:1px solid var(--line); border-radius:14px; padding:1.4rem;
+    background:var(--surface);
+  }
+  .stat-card .label{font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.08em; color:var(--slate-dim); text-transform:uppercase;}
+  .stat-card .delta-row{display:flex; align-items:baseline; gap:0.6rem; margin-top:0.6rem; flex-wrap:wrap;}
+  .stat-card .then{font-family:var(--font-mono); font-size:0.95rem; color:var(--slate); text-decoration:line-through; text-decoration-color:var(--slate-dim);}
+  .stat-card .now{font-family:var(--font-display); font-size:1.6rem; color:var(--paper);}
+  .stat-card .tag{
+    font-family:var(--font-mono); font-size:0.72rem; color:var(--mint);
+    border:1px solid rgba(95,174,138,0.35); border-radius:999px; padding:0.15rem 0.55rem;
   }
 
-  .nav-buttons {
-    margin-top: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 250px;
-    opacity: 0;
-    animation: fadeIn 2s ease 7s forwards;
+  .gallery{margin-top:3.5rem;}
+  .gallery-label{font-family:var(--font-mono); font-size:0.78rem; letter-spacing:0.08em; color:var(--slate-dim); text-transform:uppercase; margin-bottom:1rem;}
+  .gallery-row{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem;}
+  .gallery-item{
+    position:relative; aspect-ratio:3/4; border-radius:10px; overflow:hidden;
+    background:linear-gradient(135deg, var(--surface), var(--surface-2));
+    border:1px solid var(--line);
+  }
+  .gallery-item img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:2;}
+  .gallery-item .photo-placeholder{gap:0.3rem;}
+  .gallery-item .photo-placeholder .ph-icon{width:20px;height:20px;}
+  .gallery-item .check-label{
+    position:absolute; bottom:8px; left:8px; z-index:3;
+    font-family:var(--font-mono); font-size:0.65rem; color:var(--paper);
+    background:rgba(17,21,29,0.7); padding:0.25rem 0.5rem; border-radius:5px;
+  }
+  @media (max-width:600px){ .gallery-row{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- training ---------- */
+  .week-chart{
+    display:flex; gap:clamp(0.5rem,1.5vw,1.25rem); align-items:flex-end;
+    border-bottom:1px solid var(--line); padding-bottom:1.5rem;
+  }
+  .week-bar{flex:1; display:flex; flex-direction:column; align-items:center; gap:1rem;}
+  .bar-track{height:170px; width:100%; display:flex; align-items:flex-end; justify-content:center;}
+  .bar-fill{width:100%; max-width:42px; height:var(--h,4%); border-radius:7px 7px 3px 3px; min-height:6px;}
+  .type-easy{background:var(--slate-dim);}
+  .type-tempo{background:var(--gold);}
+  .type-intervals{background:var(--coral);}
+  .type-long{background:var(--paper);}
+  .type-rest{background:transparent; border:1.5px dashed var(--line-strong); min-height:6px;}
+  .bar-label{text-align:center;}
+  .bar-label strong{display:block; font-family:var(--font-mono); font-size:0.74rem; letter-spacing:0.08em; color:var(--paper);}
+  .bar-label .run-type{display:block; font-size:0.74rem; color:var(--slate); margin-top:0.15rem;}
+  .bar-label .mono{display:block; font-size:0.72rem; color:var(--slate-dim); margin-top:0.2rem;}
+
+  .week-total{
+    margin-top:1.5rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;
+    font-family:var(--font-mono); font-size:0.8rem; color:var(--slate);
+  }
+  .week-total strong{color:var(--paper);}
+
+  .run-types{display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-top:3.5rem;}
+  @media (max-width:900px){ .run-types{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .run-types{grid-template-columns:1fr;} }
+  .run-card{
+    border:1px solid var(--line); border-radius:14px; padding:1.6rem;
+    background:var(--surface); display:flex; flex-direction:column; gap:0.9rem;
+  }
+  .run-icon{width:64px; height:28px; color:var(--coral);}
+  .run-card h3{font-family:var(--font-display); font-size:1.2rem; text-transform:uppercase; letter-spacing:0.02em;}
+  .run-card .pace{font-family:var(--font-mono); font-size:0.82rem; color:var(--gold);}
+  .run-card p{font-size:0.92rem; color:var(--slate); line-height:1.55;}
+
+  /* ---------- diet ---------- */
+  .day-timeline{margin-top:1rem;}
+  .timeline-track{
+    display:flex; height:34px; border-radius:10px; overflow:hidden; border:1px solid var(--line-strong);
+  }
+  .seg.fast{background:var(--surface-2);}
+  .seg.eat{background:linear-gradient(90deg, var(--gold), var(--coral));}
+  .timeline-markers{position:relative; height:74px; margin-top:0.6rem;}
+  .marker{position:absolute; top:0; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:0.4rem; width:120px; text-align:center;}
+  .marker .dot{width:8px;height:8px;border-radius:50%;background:var(--paper); border:2px solid var(--ink);}
+  .marker .m-time{font-family:var(--font-mono); font-size:0.74rem; color:var(--paper);}
+  .marker .m-label{font-size:0.74rem; color:var(--slate-dim); line-height:1.3;}
+  .timeline-legend{display:flex; gap:1.5rem; margin-top:2.5rem; font-family:var(--font-mono); font-size:0.78rem; color:var(--slate);}
+  .timeline-legend span{display:inline-flex; align-items:center; gap:0.5rem;}
+  .legend-swatch{width:14px;height:14px;border-radius:3px;}
+
+  .meals-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-top:3.5rem;}
+  @media (max-width:860px){ .meals-grid{grid-template-columns:1fr;} }
+  .meal-card{border:1px solid var(--line); border-radius:14px; padding:1.6rem; background:var(--ink);}
+  .meal-time{font-family:var(--font-mono); font-size:0.74rem; color:var(--gold); letter-spacing:0.06em; text-transform:uppercase;}
+  .meal-card h3{font-family:var(--font-display); font-size:1.3rem; margin-top:0.5rem; text-transform:uppercase;}
+  .meal-card p{color:var(--slate); font-size:0.9rem; margin-top:0.6rem;}
+  .macro-row{display:flex; gap:1rem; margin-top:1.1rem; padding-top:1rem; border-top:1px solid var(--line); font-family:var(--font-mono); font-size:0.78rem;}
+  .macro-row div span{display:block; color:var(--slate-dim); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em;}
+  .macro-row div strong{color:var(--paper); font-size:0.95rem;}
+
+  .disclaimer{
+    margin-top:3rem; padding-top:1.75rem; border-top:1px solid var(--line);
+    font-size:0.82rem; color:var(--slate-dim); font-style:italic; max-width:60ch;
   }
 
-  @keyframes fadeIn {
-    to { opacity: 1; }
+  /* ---------- footer ---------- */
+  footer{padding:var(--section-pad) 0 3rem; border-top:1px solid var(--line);}
+  .ticker{font-family:var(--font-display); font-size:clamp(2.2rem,6vw,3.6rem); text-transform:uppercase; line-height:1.05;}
+  .ticker span{color:var(--coral);}
+  .footer-meta{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:1.5rem;
+    margin-top:2.5rem; padding-top:1.75rem; border-top:1px solid var(--line);
+    font-family:var(--font-mono); font-size:0.78rem; color:var(--slate-dim);
   }
-
-  a {
-    text-decoration: none;
-  }
-
-  .btn {
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    background-color: white;
-    color: #001f3f;
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-    user-select: none;
-    box-shadow: 0 0 8px #001f3f;
-  }
-
-  .btn:hover {
-    background-color: #f0f8ff;
-    transform: scale(1.05);
-    box-shadow: 0 0 15px #001f3f;
-  }
-
-  .flowing-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -2;
-    background: linear-gradient(45deg, 
-      #001f3f 0%, 
-      #173a5e 20%, 
-      #87ceeb 40%, 
-      #add8e6 50%, 
-      #87ceeb 60%, 
-      #173a5e 80%, 
-      #001f3f 100%);
-    background-size: 400% 400%;
-    animation: flowingGradient 8s ease-in-out infinite;
-  }
-
-  @keyframes flowingGradient {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 100% 50%; }
-    50% { background-position: 100% 0%; }
-    75% { background-position: 0% 0%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .wave-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: 
-      radial-gradient(circle at 20% 30%, rgba(173, 216, 230, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(0, 31, 63, 0.4) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(135, 206, 235, 0.2) 0%, transparent 50%);
-    animation: waveMovement 12s ease-in-out infinite;
-  }
-
-  @keyframes waveMovement {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-20px, -30px) scale(1.1); }
-    66% { transform: translate(20px, 30px) scale(0.9); }
-  }
+  .social-links{display:flex; gap:1.5rem;}
+  .social-links a{letter-spacing:0.06em; text-transform:uppercase; color:var(--slate); transition:color .2s ease;}
+  .social-links a:hover{color:var(--coral);}
 </style>
 </head>
 <body>
-<div class="flowing-bg"></div>
-<div class="wave-overlay"></div>
-<canvas id="bgCanvas"></canvas>
 
-<div class="content">
-  <h1 id="headline">
-    <span class="line1">Are you ready to start your fitness journey?</span>
-    <br />
-    <span class="line2">My name is Jessica Douthit, and I am a personal trainer who can help</span>
-    <br />
-    <span class="line3">Berea, KY</span>
-  </h1>
-
-  <div class="nav-buttons">
-    <a href="offer.html"><div class="btn"> What I Offer</div></a>
-    <a href="contact.html"><div class="btn"> Contact Me</div></a>
-    <a href="progress.html"><div class="btn"> My Personal Progress</div></a>
+<!-- ============================ NAV ============================ -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">THE LONG<span>·</span>RUN</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#progress">Progress</a></li>
+      <li><a href="#training">Training</a></li>
+      <li><a href="#diet">Diet</a></li>
+    </ul>
   </div>
-</div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero">
+  <div class="container hero-inner">
+    <div>
+      <div class="eyebrow">Personal Training Log</div>
+      <h1 class="h-display">RUN FIRST.<br>EAT AFTER.</h1>
+      <p class="lead">Distance training and intermittent fasting, logged mile by mile. This is the plan, the progress, and the proof — updated as it happens, not cleaned up after the fact.</p>
+
+      <!-- EDIT: swap in your next race -->
+      <div class="race-pill">
+        <span class="dot"></span>
+        NEXT RACE — Chicago Marathon · Oct 2026
+      </div>
+
+      <div class="hero-actions">
+        <a href="#progress" class="ghost-btn">See the progress ↓</a>
+        <a href="#training" class="ghost-btn">See the training ↓</a>
+      </div>
+    </div>
+
+    <!-- EDIT: these four numbers -->
+    <div class="stat-strip">
+      <div><div class="stat-label">Weekly Miles</div><div class="stat-value mono">40</div></div>
+      <div><div class="stat-label">Longest Run</div><div class="stat-value mono">14.0 mi</div></div>
+      <div><div class="stat-label">Fasting Window</div><div class="stat-value mono">16:8</div></div>
+      <div><div class="stat-label">Races Logged</div><div class="stat-value mono">03</div></div>
+    </div>
+
+    <div class="route-wrap">
+      <svg class="route-svg" viewBox="0 0 1200 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="routeGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#F2654A"/>
+            <stop offset="100%" stop-color="#11151D" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path class="route-fill" d="M0,160 C60,140 90,100 150,110 C210,120 230,60 290,70 C350,80 370,150 430,140 C490,130 510,40 570,50 C630,60 650,130 710,120 C770,110 790,30 850,40 C910,50 930,140 990,130 C1050,120 1070,70 1130,80 C1190,90 1200,100 1200,100 L1200,220 L0,220 Z"/>
+        <path class="route-line" pathLength="1000" d="M0,160 C60,140 90,100 150,110 C210,120 230,60 290,70 C350,80 370,150 430,140 C490,130 510,40 570,50 C630,60 650,130 710,120 C770,110 790,30 850,40 C910,50 930,140 990,130 C1050,120 1070,70 1130,80 C1190,90 1200,100 1200,100"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================ PROGRESS ============================ -->
+<section id="progress" class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Before / After</div>
+      <h2 class="h-display">The Transformation, Logged</h2>
+      <p class="lead">Photos don't lie, and neither do splits. Drag the slider to see what consistent training and a fueling window built around it can do.</p>
+    </div>
+
+    <div class="progress-grid">
+      <div class="reveal">
+        <!-- EDIT: drop images/before.jpg and images/after.jpg into an /images folder -->
+        <div class="compare" id="compare">
+          <div class="compare-photo compare-after">
+            <div class="photo-placeholder">
+              <svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>
+              <strong>After</strong>
+              <small>images/after.jpg</small>
+            </div>
+            <img src="images/after.jpg" alt="After progress photo" onerror="this.style.display='none'">
+            <span class="photo-tag">AFTER · Jun 2026</span>
+          </div>
+          <div class="compare-photo compare-before" id="compareBefore">
+            <div class="photo-placeholder">
+              <svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg>
+              <strong>Before</strong>
+              <small>images/before.jpg</small>
+            </div>
+            <img src="images/before.jpg" alt="Before progress photo" onerror="this.style.display='none'">
+            <span class="photo-tag">BEFORE · Jan 2025</span>
+          </div>
+          <div class="compare-handle" id="compareHandle"></div>
+        </div>
+        <input type="range" class="compare-range" id="compareRange" min="0" max="100" value="50" aria-label="Drag to compare before and after photos">
+        <p class="compare-caption">Drag to compare</p>
+      </div>
+
+      <!-- EDIT: these four comparison stats -->
+      <div class="stats-grid reveal">
+        <div class="stat-card">
+          <div class="label">Weight</div>
+          <div class="delta-row"><span class="then mono">192 lb</span><span class="now mono">168 lb</span><span class="tag">−24 lb</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Mile Pace</div>
+          <div class="delta-row"><span class="then mono">10:45</span><span class="now mono">8:20</span><span class="tag">−2:25</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">5K Time</div>
+          <div class="delta-row"><span class="then mono">29:40</span><span class="now mono">24:10</span><span class="tag">−5:30</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Resting HR</div>
+          <div class="delta-row"><span class="then mono">78 bpm</span><span class="now mono">58 bpm</span><span class="tag">−20 bpm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT: add as many checkpoints as you like -->
+    <div class="gallery reveal">
+      <div class="gallery-label">Checkpoints</div>
+      <div class="gallery-row">
+        <div class="gallery-item">
+          <div class="photo-placeholder"><svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></div>
+          <img src="images/checkpoint-1.jpg" alt="Month 1 checkpoint" onerror="this.style.display='none'">
+          <span class="check-label">MONTH 1</span>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-placeholder"><svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></div>
+          <img src="images/checkpoint-2.jpg" alt="Month 3 checkpoint" onerror="this.style.display='none'">
+          <span class="check-label">MONTH 3</span>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-placeholder"><svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></div>
+          <img src="images/checkpoint-3.jpg" alt="Month 6 checkpoint" onerror="this.style.display='none'">
+          <span class="check-label">MONTH 6</span>
+        </div>
+        <div class="gallery-item">
+          <div class="photo-placeholder"><svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/></svg></div>
+          <img src="images/checkpoint-4.jpg" alt="Current checkpoint" onerror="this.style.display='none'">
+          <span class="check-label">NOW</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TRAINING ============================ -->
+<section id="training" class="section section-alt">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">The Build</div>
+      <h2 class="h-display">How the Mileage Breaks Down</h2>
+      <p class="lead">Most weeks land around 40 miles, split across one quality session, one long run, and a handful of easy days that let the legs absorb it. Structure beats heroics.</p>
+    </div>
+
+    <!-- EDIT: your real weekly split — bar height comes from the --h custom property -->
+    <div class="reveal">
+      <div class="week-chart">
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-easy" style="--h:35.7%"></div></div>
+          <div class="bar-label"><strong>MON</strong><span class="run-type">Easy</span><span class="mono">5 mi</span></div>
+        </div>
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-intervals" style="--h:42.9%"></div></div>
+          <div class="bar-label"><strong>TUE</strong><span class="run-type">Intervals</span><span class="mono">6 mi</span></div>
+        </div>
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-rest"></div></div>
+          <div class="bar-label"><strong>WED</strong><span class="run-type">Rest</span><span class="mono">0 mi</span></div>
+        </div>
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-tempo" style="--h:42.9%"></div></div>
+          <div class="bar-label"><strong>THU</strong><span class="run-type">Tempo</span><span class="mono">6 mi</span></div>
+        </div>
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-easy" style="--h:35.7%"></div></div>
+          <div class="bar-label"><strong>FRI</strong><span class="run-type">Easy</span><span class="mono">5 mi</span></div>
+        </div>
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-long" style="--h:100%"></div></div>
+          <div class="bar-label"><strong>SAT</strong><span class="run-type">Long Run</span><span class="mono">14 mi</span></div>
+        </div>
+        <div class="week-bar">
+          <div class="bar-track"><div class="bar-fill type-easy" style="--h:28.6%"></div></div>
+          <div class="bar-label"><strong>SUN</strong><span class="run-type">Recovery</span><span class="mono">4 mi</span></div>
+        </div>
+      </div>
+      <div class="week-total">
+        <span>Weekly total — <strong class="mono">40 mi</strong></span>
+        <span>Quality sessions — <strong class="mono">2</strong></span>
+        <span>Rest days — <strong class="mono">1</strong></span>
+      </div>
+    </div>
+
+    <!-- EDIT: paces + descriptions to match your own plan -->
+    <div class="run-types">
+      <div class="run-card reveal">
+        <svg class="run-icon" viewBox="0 0 64 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2,16 Q16,11 30,16 T60,16"/></svg>
+        <h3>Easy</h3>
+        <div class="pace mono">9:30–10:15 /mi</div>
+        <p>Conversational pace, roughly 65–75% max heart rate. The bulk of the week — these miles build the aerobic base everything else depends on.</p>
+      </div>
+      <div class="run-card reveal">
+        <svg class="run-icon" viewBox="0 0 64 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2,24 L20,17 L40,11 L60,4"/></svg>
+        <h3>Tempo</h3>
+        <div class="pace mono">8:00–8:20 /mi</div>
+        <p>Comfortably hard, sustained for 3–5 miles. Teaches the legs to hold a faster pace under fatigue without falling apart.</p>
+      </div>
+      <div class="run-card reveal">
+        <svg class="run-icon" viewBox="0 0 64 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2,24 L9,5 L16,24 L23,5 L30,24 L37,5 L44,24 L51,5 L58,15"/></svg>
+        <h3>Intervals</h3>
+        <div class="pace mono">6 × 800m @ 5K effort</div>
+        <p>Short, sharp repeats with full recovery in between. Builds top-end speed and running economy that pays off in every other run.</p>
+      </div>
+      <div class="run-card reveal">
+        <svg class="run-icon" viewBox="0 0 64 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2,24 Q32,-2 62,24"/></svg>
+        <h3>Long Run</h3>
+        <div class="pace mono">9:45–10:30 /mi · 12–16 mi</div>
+        <p>The week's anchor. Slow and steady, building the time-on-feet endurance that distance running is named for.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DIET / IF ============================ -->
+<section id="diet" class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">Fuel Window</div>
+      <h2 class="h-display">16:8, Built Around the Run</h2>
+      <p class="lead">Fasted runs in the morning, real food in an eight-hour window after. Simple rules, kept consistently, beat any plan that's complicated enough to abandon.</p>
+    </div>
+
+    <!-- EDIT: adjust segment widths + marker positions/labels to match your own window -->
+    <div class="day-timeline reveal">
+      <div class="timeline-track">
+        <div class="seg fast" style="width:50%"></div>
+        <div class="seg eat" style="width:33.3%"></div>
+        <div class="seg fast" style="width:16.7%"></div>
+      </div>
+      <div class="timeline-markers">
+        <div class="marker" style="left:25%"><span class="dot"></span><span class="m-time mono">6 AM</span><span class="m-label">Wake + fasted run</span></div>
+        <div class="marker" style="left:50%"><span class="dot"></span><span class="m-time mono">12 PM</span><span class="m-label">Break the fast</span></div>
+        <div class="marker" style="left:66.7%"><span class="dot"></span><span class="m-time mono">4 PM</span><span class="m-label">Second meal</span></div>
+        <div class="marker" style="left:83.3%"><span class="dot"></span><span class="m-time mono">8 PM</span><span class="m-label">Window closes</span></div>
+      </div>
+      <div class="timeline-legend">
+        <span><span class="legend-swatch" style="background:var(--surface-2)"></span>Fasting — 16 hrs</span>
+        <span><span class="legend-swatch" style="background:linear-gradient(90deg,var(--gold),var(--coral))"></span>Eating window — 8 hrs</span>
+      </div>
+    </div>
+
+    <!-- EDIT: meal descriptions + macros -->
+    <div class="meals-grid">
+      <div class="meal-card reveal">
+        <div class="meal-time">12:00 PM</div>
+        <h3>Break the Fast</h3>
+        <p>Eggs, oats, and fruit — something easy to digest after a fasted run, with enough protein to start repairing.</p>
+        <div class="macro-row">
+          <div><span>Protein</span><strong>32g</strong></div>
+          <div><span>Carbs</span><strong>58g</strong></div>
+          <div><span>Fat</span><strong>18g</strong></div>
+        </div>
+      </div>
+      <div class="meal-card reveal">
+        <div class="meal-time">3:30 PM</div>
+        <h3>Second Meal</h3>
+        <p>Chicken, rice, and vegetables. The biggest meal of the day, timed to land mid-window when appetite peaks.</p>
+        <div class="macro-row">
+          <div><span>Protein</span><strong>40g</strong></div>
+          <div><span>Carbs</span><strong>65g</strong></div>
+          <div><span>Fat</span><strong>14g</strong></div>
+        </div>
+      </div>
+      <div class="meal-card reveal">
+        <div class="meal-time">7:30 PM</div>
+        <h3>Dinner</h3>
+        <p>Salmon, potatoes, and greens before the window closes — enough fuel on board to recover overnight.</p>
+        <div class="macro-row">
+          <div><span>Protein</span><strong>38g</strong></div>
+          <div><span>Carbs</span><strong>50g</strong></div>
+          <div><span>Fat</span><strong>22g</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="disclaimer">Fasting and training schedules are personal — adjust timing, duration, and intake to fit your own body, goals, and any guidance from a doctor or dietitian, especially around long or hard efforts.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer>
+  <div class="container">
+    <!-- EDIT: this number -->
+    <div class="ticker reveal">1,284 <span>MILES</span><br>LOGGED THIS YEAR</div>
+    <div class="footer-meta">
+      <span>© <span id="year"></span> The Long Run — built one log entry at a time.</span>
+      <!-- EDIT: your real links -->
+      <div class="social-links">
+        <a href="#">Strava</a>
+        <a href="#">Instagram</a>
+        <a href="#">Email</a>
+      </div>
+    </div>
+  </div>
+</footer>
 
 <script>
-window.addEventListener('load', function() {
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d');
-  
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  window.addEventListener('resize', function() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+  // mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', () => {
+    const open = navLinks.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open);
+  });
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => navLinks.classList.remove('open'));
   });
 
-  // Create flowing particles
-  const particles = [];
-  for(let i = 0; i < 30; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
-      size: Math.random() * 20 + 5,
-      opacity: Math.random() * 0.3 + 0.1,
-      color: Math.random() > 0.5 ? 'rgba(173, 216, 230,' : 'rgba(0, 31, 63,'
-    });
+  // before/after compare slider
+  const compareBefore = document.getElementById('compareBefore');
+  const compareHandle = document.getElementById('compareHandle');
+  const compareRange = document.getElementById('compareRange');
+  function updateCompare(v){
+    compareBefore.style.clipPath = `polygon(0 0, ${v}% 0, ${v}% 100%, 0 100%)`;
+    compareHandle.style.left = v + '%';
+  }
+  compareRange.addEventListener('input', e => updateCompare(e.target.value));
+  updateCompare(50);
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach(el => io.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('in-view'));
   }
 
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach(particle => {
-      particle.x += particle.vx;
-      particle.y += particle.vy;
-
-      // Wrap around screen
-      if(particle.x < 0) particle.x = canvas.width;
-      if(particle.x > canvas.width) particle.x = 0;
-      if(particle.y < 0) particle.y = canvas.height;
-      if(particle.y > canvas.height) particle.y = 0;
-
-      // Draw particle
-      ctx.fillStyle = particle.color + particle.opacity + ')';
-      ctx.beginPath();
-      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    requestAnimationFrame(animate);
-  }
-
-  animate();
-});
+  // footer year
+  document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
